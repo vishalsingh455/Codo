@@ -4,7 +4,10 @@ import cors from 'cors'
 import authRoutes from './routes/auth.routes.js'
 import testRoutes from './routes/test.routes.js'
 import cookieParser from "cookie-parser";
-
+import competitionRoutes from './routes/competition.routes.js'
+import userRoutes from './routes/user.routes.js'
+import authUserMiddleware from "./middlewares/auth.middleware.js";
+import { getAllCompetitions } from "./controllers/competition.controller.js";
 dotenv.config()
 const app = express()
 
@@ -15,12 +18,14 @@ app.use(cookieParser())
 
 // routes
 
-app.get('/', (req, res) => {
-    res.send("Hello world")
-})
+app.get('/', authUserMiddleware, getAllCompetitions)
 
 app.use('/api/auth', authRoutes)
 app.use("/api/test", testRoutes);
+
+app.use('/api/competitions', competitionRoutes)
+
+app.use('/api/user', userRoutes)
 
 
 export default app
