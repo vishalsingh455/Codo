@@ -8,6 +8,8 @@ import competitionRoutes from './routes/competition.routes.js'
 import userRoutes from './routes/user.routes.js'
 import authUserMiddleware from "./middlewares/auth.middleware.js";
 import { getAllCompetitions } from "./controllers/competition.controller.js";
+import problemRoutes from './routes/problem.routes.js'
+import testCaseRoutes from './routes/testCase.routes.js'
 dotenv.config()
 const app = express()
 
@@ -26,6 +28,10 @@ app.use("/api/test", testRoutes);
 app.use('/api/competitions', competitionRoutes)
 
 app.use('/api/user', userRoutes)
+
+app.use('/api', problemRoutes)
+
+app.use('/api', testCaseRoutes)
 
 
 export default app
