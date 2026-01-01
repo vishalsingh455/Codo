@@ -11,6 +11,7 @@ import { getAllCompetitions } from "./controllers/competition.controller.js";
 import problemRoutes from './routes/problem.routes.js'
 import testCaseRoutes from './routes/testCase.routes.js'
 import submissionRoutes from './routes/submission.routes.js'
+import leaderboardRoutes from './routes/leaderboard.routes.js'
 dotenv.config()
 const app = express()
 
@@ -35,4 +36,6 @@ app.use('/api', problemRoutes)
 app.use('/api', testCaseRoutes)
 
 app.use('/api', submissionRoutes)
+
+app.use('/api', leaderboardRoutes)
 export default app
