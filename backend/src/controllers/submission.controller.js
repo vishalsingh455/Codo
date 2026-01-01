@@ -1,6 +1,7 @@
 import { Submission } from "../models/Submission.model.js";
 import { Problem } from "../models/Problem.model.js";
 import { Competition } from "../models/Competition.model.js";
+import { evaluateSubmission } from "./evaluation.controller.js";
 
 const submitCode = async (req, res) => {
     try {
@@ -48,6 +49,9 @@ const submitCode = async (req, res) => {
             language,
             status:"pending"
         })
+
+        // eavluate submission
+        await evaluateSubmission(submission._id)
     
         return res
         .status(201)
