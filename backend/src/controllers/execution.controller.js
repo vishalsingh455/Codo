@@ -11,7 +11,7 @@ const executeSubmission = async (submission, testCases) => {
         );
         console.log("INPUT:", testCase.input);
         console.log("EXPECTED:", testCase.expectedOutput);
-        console.log("ACTUAL:", output);
+        console.log("OUTPUT:", output);
 
         if (
             output.trim() === testCase.expectedOutput.trim()

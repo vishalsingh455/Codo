@@ -12,11 +12,15 @@ import problemRoutes from './routes/problem.routes.js'
 import testCaseRoutes from './routes/testCase.routes.js'
 import submissionRoutes from './routes/submission.routes.js'
 import leaderboardRoutes from './routes/leaderboard.routes.js'
+import resultRoutes from './routes/result.routes.js'
 dotenv.config()
 const app = express()
 
 //middlewares
-app.use(cors())
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
 app.use(express.json())
 app.use(cookieParser())
 
@@ -38,4 +42,6 @@ app.use('/api', testCaseRoutes)
 app.use('/api', submissionRoutes)
 
 app.use('/api', leaderboardRoutes)
+
+app.use("/api", resultRoutes)
 export default app
