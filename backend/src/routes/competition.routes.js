@@ -1,6 +1,6 @@
 import express from "express";
 import authUserMiddleware from "../middlewares/auth.middleware.js";
-import { createCompetition, joinCompetition } from "../controllers/competition.controller.js";
+import { createCompetition, joinCompetition, getMyCompetitions } from "../controllers/competition.controller.js";
 import { getCompetitionSubmissions } from "../controllers/competitionSubmissions.controller.js";
 
 const router = express.Router()
@@ -13,6 +13,8 @@ router.get(
     authUserMiddleware,
     getCompetitionSubmissions
 );
+
+router.get('/my-competitions', authUserMiddleware, getMyCompetitions)
 
 
 export default router

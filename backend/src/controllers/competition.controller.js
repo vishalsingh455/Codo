@@ -134,4 +134,38 @@ const getAllCompetitions = async (req, res) => {
 
 }
 
-export {createCompetition, joinCompetition, getAllCompetitions}
+const getMyCompetitions = async (req, res) => {
+    try {
+        const userId = req.user.id
+
+        const competitions = await Competition.find({
+            organizer:userId
+        })
+
+        if(!competitions) {
+            return res
+            .status(404)
+            .json({
+                succes:false,
+                message:"No competition found"
+            })
+        }
+
+        return res
+        .status(200)
+        .json({
+            success:true,
+            message:"your organized competitions fetched",
+            competitions
+        })
+    } catch (error) {
+        return res
+        .status(500)
+        .json({
+            success:false,
+            message:"Server error while fetching your competitions"
+        })
+    }
+}
+
+export {createCompetition, joinCompetition, getAllCompetitions, getMyCompetitions}
