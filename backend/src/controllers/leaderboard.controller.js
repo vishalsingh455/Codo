@@ -16,28 +16,45 @@ const getLeaderboard = async (req, res) => {
 
         submissions.forEach(sub => {
             const userId = sub.user._id.toString();
+            const problemId = sub.problem.toString();
 
             if (!leaderboardMap[userId]) {
                 leaderboardMap[userId] = {
                     userId,
                     name: sub.user.name,
                     totalScore: 0,
+                    problemScores: {},
                     earliestSubmission: sub.createdAt
                 };
             }
 
-            leaderboardMap[userId].totalScore += sub.score;
+            // Keep BEST score per problem
+            if (
+                !leaderboardMap[userId].problemScores[problemId] ||
+                leaderboardMap[userId].problemScores[problemId] < sub.score
+            ) {
+                leaderboardMap[userId].problemScores[problemId] = sub.score;
+            }
 
-            // Track earliest submission time
+            // Track earliest submission for tie-breaker
             if (sub.createdAt < leaderboardMap[userId].earliestSubmission) {
                 leaderboardMap[userId].earliestSubmission = sub.createdAt;
             }
         });
 
-        // 3️ Convert map to array
-        const leaderboard = Object.values(leaderboardMap);
+        const leaderboard = Object.values(leaderboardMap).map(user => {
+            const totalScore = Object.values(user.problemScores)
+                .reduce((sum, s) => sum + s, 0);
 
-        // 4️ Sort leaderboard
+            return {
+                userId: user.userId,
+                name: user.name,
+                totalScore,
+                earliestSubmission: user.earliestSubmission
+            };
+        });
+
+        // Sort leaderboard
         leaderboard.sort((a, b) => {
             if (b.totalScore !== a.totalScore) {
                 return b.totalScore - a.totalScore;
