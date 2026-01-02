@@ -27,7 +27,7 @@ app.use(cookieParser())
 
 // routes
 
-app.get('/', authUserMiddleware, getAllCompetitions)
+//app.get('/', authUserMiddleware, getAllCompetitions)
 
 app.use('/api/auth', authRoutes)
 app.use("/api/test", testRoutes);
