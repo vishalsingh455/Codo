@@ -136,28 +136,16 @@ const getAllCompetitions = async (req, res) => {
 
 const getMyCompetitions = async (req, res) => {
     try {
-        const userId = req.user.id
+        const userId = req.user.id;
 
         const competitions = await Competition.find({
-            organizer:userId
-        })
+            organizer: userId
+        }).sort({ createdAt: -1 });
 
-        if(!competitions) {
-            return res
-            .status(404)
-            .json({
-                succes:false,
-                message:"No competition found"
-            })
-        }
-
-        return res
-        .status(200)
-        .json({
-            success:true,
-            message:"your organized competitions fetched",
+        return res.status(200).json({
+            success: true,
             competitions
-        })
+        });
     } catch (error) {
         return res
         .status(500)
