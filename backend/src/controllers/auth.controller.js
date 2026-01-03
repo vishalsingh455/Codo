@@ -145,34 +145,4 @@ const logoutUser = async (req, res) => {
     }
 }
 
-const getUser = async(req, res) => {
-    const userId = req.user.id
-    if(!userId) {
-        return res
-        .status(401)
-        .json({
-            success:false,
-           message:"Unauthorized access"
-        })
-    }
-    const user = await User.findById(userId);
-    if(!user) {
-        return res
-            .status(401)
-            .json({
-                success: false,
-                message: "Unauthorized access"
-            })
-    }
-    return res
-    .status(200)
-    .json({
-        success:true,
-        user: {
-            id:userId,
-            name:user.name
-        }
-    })
-}
-
-export {registerUser, loginUser, logoutUser, getUser}
+export {registerUser, loginUser, logoutUser}
