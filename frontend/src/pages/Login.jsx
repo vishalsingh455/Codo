@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
 import { useNavigate } from 'react-router-dom';
 import Register from "./Register";
+import { useAuth } from "../context/auth";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -9,15 +10,23 @@ const Login = () => {
     const [error, setError] = useState("")
 
     const navigate = useNavigate();
+    const { user, loading, refreshUser } = useAuth();
+
+    useEffect(() => {
+        if (!loading && user) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [loading, user, navigate]);
 
     const handleLogin = async (e) => {
         try {
             e.preventDefault();
-            const res = await api.post("/auth/login", { email, password });
-            console.log(res)
-        } catch (error) {
+            await api.post("/auth/login", { email, password });
+            await refreshUser();
+            navigate('/dashboard', { replace: true });
+        } catch (e) {
             setError(
-                error.response?.data?.message || "Something went wrong"
+                e.response?.data?.message || "Something went wrong"
             );
         }
     };
@@ -50,9 +59,7 @@ const Login = () => {
                     Login
                 </button>
 
-                <p onClick={()=> {
-                    //<Register/>
-                }} className=" w-1/2 text-center bg-pink-400 hover:bg-indigo-700 py-1 px-2 rounded text-white  mt-6 ml-18">Register</p>
+                <p className="w-full text-center text-indigo-400 hover:text-indigo-300 py-2 mt-4 cursor-pointer" onClick={() => navigate('/register')}>Don't have an account? Register</p>
 
                 {error && (
                     <p className="text-red-400 text-sm mb-3 text-center">

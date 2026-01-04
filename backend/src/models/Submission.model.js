@@ -40,6 +40,11 @@ const submissionSchema = new mongoose.Schema(
         score: {
             type: Number,
             default: 0
+        },
+
+        error: {
+            type: String,
+            default: ""
         }
     },
     { timestamps: true }

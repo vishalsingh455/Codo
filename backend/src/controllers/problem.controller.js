@@ -1,5 +1,6 @@
 import { Problem } from "../models/Problem.model.js";
 import { Competition } from "../models/Competition.model.js";
+import mongoose from "mongoose";
 
 const addProblem = async (req, res) => {
     try {
@@ -86,4 +87,94 @@ const addProblem = async (req, res) => {
     }
 }
 
-export {addProblem}
+const getProblemsByCompetition = async (req, res) => {
+    try {
+        const { competitionId } = req.params;
+        const userId = req.user.id;
+
+        // Check if user is registered in the competition
+        const competition = await Competition.findById(competitionId);
+        if (!competition) {
+            return res.status(404).json({
+                success: false,
+                message: "Competition not found"
+            });
+        }
+
+        // Check if user is registered in the competition or is the organizer
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const isRegistered = competition.registeredUsers.some(id => id.equals(userObjectId));
+        const isOrganizer = competition.organizer.toString() === userId;
+
+        if (!isRegistered && !isOrganizer) {
+            return res.status(403).json({
+                success: false,
+                message: "You must be registered or organizer to access this competition's problems"
+            });
+        }
+
+        // Find problems for this competition
+        const problems = await Problem.find({ competition: competitionId });
+
+        return res.status(200).json({
+            success: true,
+            problems
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while fetching problems"
+        });
+    }
+};
+
+const getProblemById = async (req, res) => {
+    try {
+        const { problemId } = req.params;
+        const userId = req.user.id;
+
+        const problem = await Problem.findById(problemId);
+        
+        if (!problem) {
+            return res.status(404).json({
+                success: false,
+                message: "Problem not found"
+            });
+        }
+
+        const competition = await Competition.findById(problem.competition);
+        
+        if (!competition) {
+            return res.status(404).json({
+                success: false,
+                message: "Competition not found"
+            });
+        }
+
+        // Check if user is registered in the competition or is the organizer
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const isRegistered = competition.registeredUsers.some(id => id.equals(userObjectId));
+        const isOrganizer = competition.organizer.toString() === userId;
+        
+        if (!isRegistered && !isOrganizer) {
+            return res.status(403).json({
+                success: false,
+                message: "You must be registered or organizer to access this problem"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            problem
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while fetching problem"
+        });
+    }
+};
+
+export {addProblem, getProblemsByCompetition, getProblemById}

@@ -18,6 +18,11 @@ const getUserDashboard = async (req, res) => {
 
         return res.status(200).json({
             success: true,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email
+            },
             organizedCompetitions: user.organizedCompetitions,
             registeredCompetitions: user.registeredCompetitions
         });

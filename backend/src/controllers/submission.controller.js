@@ -38,19 +38,6 @@ const submitCode = async (req, res) => {
                 message: "You must join the competition before submitting"
             });
         }
-    
-        // user only submit atmost 7 times
-        const count = await Submission.countDocuments({
-            user: userId,
-            problem: problemId
-        });
-
-        if (count >= 7) {
-            return res.status(400).json({
-                success: false,
-                message: "Submission limit reached"
-            });
-        }
 
         // create submission
     

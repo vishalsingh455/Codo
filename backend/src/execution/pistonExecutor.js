@@ -9,6 +9,11 @@ const runCodePiston = async (language, code, input) => {
             throw new Error("Unsupported language");
         }
 
+        const fileName = language === "python" ? "main.py" :
+                        language === "cpp" ? "main.cpp" :
+                        language === "java" ? "Main.java" :
+                        "main.js";
+
         const response = await axios.post(
             "https://emkc.org/api/v2/piston/execute",
             {
@@ -16,7 +21,7 @@ const runCodePiston = async (language, code, input) => {
                 version: "*",
                 files: [
                     {
-                        name: "main",
+                        name: fileName,
                         content: code
                     }
                 ],
@@ -29,8 +34,13 @@ const runCodePiston = async (language, code, input) => {
             }
         );
 
-        //return response.data.output ? response.data.output.trim() : "";
-        return response.data.run?.stdout?.trim() || "aaa";
+        const stdout = response.data.run?.stdout?.trim() || "";
+        const stderr = response.data.run?.stderr?.trim() || "";
+
+        return {
+            output: stdout,
+            error: stderr || null
+        };
 
     } catch (error) {
         console.error("Piston error:", error.message || error);

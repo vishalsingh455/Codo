@@ -3,37 +3,37 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 const UserDashboard = () => {
-    const [competitions, setCompetitions] = useState([]);
     const [myCompetitions, setMyCompetitions] = useState([]);
-    const [activeTab, setActiveTab] = useState("joined");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [user, setUser] = useState(null);
+    const [submissions, setSubmissions] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchUserData();
-        fetchMyCompetitions();
+        fetchMySubmissions();
     }, []);
 
     const fetchUserData = async () => {
         try {
+            setLoading(true);
             const res = await api.get("/user/dashboard");
             setUser(res.data.user);
-        } catch (err) {
-            console.error("Failed to fetch user data");
-        }
-    };
-
-    const fetchMyCompetitions = async () => {
-        try {
-            setLoading(true);
-            const res = await api.get("/user/my-competitions");
-            setMyCompetitions(res.data.competitions || []);
-        } catch (err) {
-            setError("Failed to load competitions");
+            setMyCompetitions(res.data.registeredCompetitions || []);
+        } catch {
+            setError("Failed to load dashboard data");
         } finally {
             setLoading(false);
+        }
+    };
+    
+    const fetchMySubmissions = async () => {
+        try {
+            const res = await api.get("/my-submissions");
+            setSubmissions(res.data.submissions || []);
+        } catch {
+            console.error("Failed to fetch submissions");
         }
     };
 
@@ -42,7 +42,7 @@ const UserDashboard = () => {
             await api.post("/auth/logout");
             navigate("/");
             window.location.reload();
-        } catch (err) {
+        } catch {
             console.error("Logout failed");
         }
     };
@@ -166,7 +166,58 @@ const UserDashboard = () => {
                             </div>
                             <div>
                                 <p className="text-gray-400 text-sm">Total Submissions</p>
-                                <p className="text-3xl font-bold text-white">0</p>
+                                <p className="text-3xl font-bold text-white">{submissions.length}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Additional Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-xl p-6">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-green-600/20 rounded-lg">
+                                <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-gray-400 text-sm">Accepted Submissions</p>
+                                <p className="text-3xl font-bold text-white">
+                                    {submissions.filter(sub => sub.status === 'accepted').length}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-xl p-6">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-red-600/20 rounded-lg">
+                                <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-gray-400 text-sm">Rejected Submissions</p>
+                                <p className="text-3xl font-bold text-white">
+                                    {submissions.filter(sub => sub.status === 'rejected').length}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-xl p-6">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-yellow-600/20 rounded-lg">
+                                <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-gray-400 text-sm">Total Score</p>
+                                <p className="text-3xl font-bold text-white">
+                                    {submissions.reduce((sum, sub) => sum + (sub.score || 0), 0)}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -247,7 +298,7 @@ const UserDashboard = () => {
                                                 View Problems
                                             </Link>
                                             <Link
-                                                to={`/leaderboard/${competition._id}`}
+                                                to={`/competitions/${competition._id}/leaderboard`}
                                                 className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition"
                                             >
                                                 Leaderboard

@@ -127,6 +127,9 @@ const AddProblem = () => {
                     <option value="medium">Medium</option>
                     <option value="hard">Hard</option>
                 </select>
+                <p className="text-gray-400 text-xs mb-4">
+                    Points per test case: {difficulty === 'easy' ? 5 : difficulty === 'medium' ? 10 : 15}
+                </p>
 
                 {/* Error / Success */}
                 {error && (

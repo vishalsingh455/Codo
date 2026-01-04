@@ -18,20 +18,21 @@ const evaluateSubmission = async (submissionId) => {
         })
 
         // execute code
-        const passedCount = await executeSubmission(
+        const result = await executeSubmission(
             submission,
             testCases
-        )
+        );
 
         // calculate score
-        const score = passedCount * problem.marksPerTestCase;
+        const score = result.passed * problem.marksPerTestCase;
 
         // decide status
-        const status = passedCount === testCases.length ? "accepted" : "rejected"
+        const status = result.passed === testCases.length ? "accepted" : "rejected";
 
         //update submission
         submission.score = score;
         submission.status = status;
+        submission.error = result.error || "";
         await submission.save();
     } catch (error) {
         console.log("Error while evaluation of code")

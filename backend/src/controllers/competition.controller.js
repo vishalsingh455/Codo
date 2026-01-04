@@ -1,6 +1,7 @@
 import { Competition } from "../models/Competition.model.js";
 import { User } from "../models/User.model.js";
 import generateRoomCode from "../utils/generateRoomCode.js";
+import mongoose from "mongoose";
 
 const createCompetition = async (req, res) => {
     try {
@@ -79,15 +80,16 @@ const joinCompetition = async (req, res) => {
         }
     
         // check if user already joined
-        if(competition.registeredUsers.includes(userId)) {
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        if(competition.registeredUsers.some(id => id.equals(userObjectId))) {
             return res.status(400).json({
                 success: false,
                 message: "User already joined this competition"
             });
         }
-    
+
         // add user to competition
-        competition.registeredUsers.push(userId)
+        competition.registeredUsers.push(userObjectId)
         await competition.save()
     
         // add competition to user
@@ -156,4 +158,94 @@ const getMyCompetitions = async (req, res) => {
     }
 }
 
-export {createCompetition, joinCompetition, getAllCompetitions, getMyCompetitions}
+const getCompetitionById = async (req, res) => {
+    try {
+        const { competitionId } = req.params;
+        const userId = req.user.id;
+
+        const competition = await Competition.findById(competitionId);
+        
+        if (!competition) {
+            return res.status(404).json({
+                success: false,
+                message: "Competition not found"
+            });
+        }
+
+        // Check if user is registered in the competition or is the organizer
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const isRegistered = competition.registeredUsers.some(id => id.equals(userObjectId));
+        const isOrganizer = competition.organizer.toString() === userId;
+        
+        if (!isRegistered && !isOrganizer) {
+            return res.status(403).json({
+                success: false,
+                message: "You must be registered or organizer to access this competition"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            competition
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while fetching competition"
+        });
+    }
+};
+
+const submitCompetition = async (req, res) => {
+    try {
+        const { competitionId } = req.params;
+        const userId = req.user.id;
+
+        const competition = await Competition.findById(competitionId);
+
+        if (!competition) {
+            return res.status(404).json({
+                success: false,
+                message: "Competition not found"
+            });
+        }
+
+        // Check if user is registered
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        if (!competition.registeredUsers.some(id => id.equals(userObjectId))) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not registered for this competition"
+            });
+        }
+
+        // Check if competition has ended
+        const now = new Date();
+        const endTime = new Date(competition.endTime);
+        if (now < endTime) {
+            return res.status(400).json({
+                success: false,
+                message: "Competition is still ongoing. You can only submit after it ends."
+            });
+        }
+
+        // Mark competition as submitted for this user
+        // You could add a field to track submitted users, or just return success
+        // For now, we'll just return success as the submission is complete
+
+        return res.status(200).json({
+            success: true,
+            message: "Competition submitted successfully"
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error while submitting competition"
+        });
+    }
+};
+
+export {createCompetition, joinCompetition, getAllCompetitions, getMyCompetitions, getCompetitionById, submitCompetition}

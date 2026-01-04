@@ -1,17 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../services/api";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../context/auth";
 
 const Register = () => {
     const [name, setName] = useState("")
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const navigate = useNavigate();
+    const { user, loading, refreshUser } = useAuth();
+
+    useEffect(() => {
+        if (!loading && user) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [loading, user, navigate]);
 
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            const res = await api.post("/auth/register", {name, email, password });
-            console.log(res.data)
+            await api.post("/auth/register", {name, email, password });
+            await api.post("/auth/login", { email, password });
+            await refreshUser();
+            navigate('/dashboard', { replace: true });
         } catch (error) {
             setError(
                 error.response?.data?.message || "Something went wrong"
@@ -51,7 +63,7 @@ const Register = () => {
                 />
 
                 <button className="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded text-white font-semibold">
-                    Login
+                    Register
                 </button>
 
                 {error && (
