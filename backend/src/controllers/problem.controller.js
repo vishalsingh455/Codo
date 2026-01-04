@@ -134,8 +134,9 @@ const getProblemById = async (req, res) => {
         const { problemId } = req.params;
         const userId = req.user.id;
 
-        const problem = await Problem.findById(problemId);
-        
+        // Populate the competition data so frontend can access startTime/endTime
+        const problem = await Problem.findById(problemId).populate('competition');
+
         if (!problem) {
             return res.status(404).json({
                 success: false,
@@ -143,8 +144,8 @@ const getProblemById = async (req, res) => {
             });
         }
 
-        const competition = await Competition.findById(problem.competition);
-        
+        const competition = problem.competition;
+
         if (!competition) {
             return res.status(404).json({
                 success: false,
@@ -156,7 +157,7 @@ const getProblemById = async (req, res) => {
         const userObjectId = new mongoose.Types.ObjectId(userId);
         const isRegistered = competition.registeredUsers.some(id => id.equals(userObjectId));
         const isOrganizer = competition.organizer.toString() === userId;
-        
+
         if (!isRegistered && !isOrganizer) {
             return res.status(403).json({
                 success: false,
