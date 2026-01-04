@@ -150,7 +150,7 @@ const CompetitionDetails = () => {
                             </div>
                         </div>
                         <div className="flex gap-3">
-                            {status.text === 'Ended' && (
+                            {(status.text === 'Live' || status.text === 'Ended') && (
                                 <button
                                     onClick={handleSubmitCompetition}
                                     disabled={submitting}

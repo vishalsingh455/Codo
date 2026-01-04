@@ -19,7 +19,7 @@ const Leaderboard = () => {
                 setCompetition(compRes.data.competition);
                 
                 // Get leaderboard
-                const leaderboardRes = await api.get(`/leaderboard/competitions/${competitionId}/leaderboard`);
+                const leaderboardRes = await api.get(`/competitions/${competitionId}/leaderboard`);
                 setLeaderboard(leaderboardRes.data.leaderboard || []);
             } catch (err) {
                 setError('Failed to load leaderboard');

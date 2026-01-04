@@ -8,16 +8,10 @@ const Analytics = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const fetchAnalyticsMemo = useCallback(fetchAnalytics, [competitionId]);
-
-    useEffect(() => {
-        fetchAnalyticsMemo();
-    }, [fetchAnalyticsMemo]);
-
     const fetchAnalytics = async () => {
         try {
             setLoading(true);
-            const res = await api.get(`/analytics/competitions/${competitionId}/analytics`);
+            const res = await api.get(`/competitions/${competitionId}/analytics`);
             setAnalytics(res.data.analytics);
         } catch (err) {
             setError(err.response?.data?.message || "Failed to load analytics");
@@ -25,6 +19,12 @@ const Analytics = () => {
             setLoading(false);
         }
     };
+
+    const fetchAnalyticsMemo = useCallback(fetchAnalytics, [competitionId]);
+
+    useEffect(() => {
+        fetchAnalyticsMemo();
+    }, [fetchAnalyticsMemo]);
 
     if (loading) {
         return (

@@ -146,17 +146,19 @@ int main() {
             });
 
             setMessage("✅ Code submitted successfully!");
-            
+
             // Optionally fetch recent submissions to show results
             const submissionsRes = await api.get('/my-submissions');
             setSubmissions(submissionsRes.data.submissions || []);
-            
+
         } catch (error) {
             setMessage(`❌ Submission failed: ${error.response?.data?.message || error.message}`);
         } finally {
             setLoading(false);
         }
     };
+
+
     
     const getDifficultyColor = (difficulty) => {
         switch(difficulty) {
@@ -179,45 +181,55 @@ int main() {
         <div className="min-h-screen bg-gray-950">
             {/* Header */}
             <div className="bg-gray-900 border-b border-gray-800 px-6 py-4">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div>
-                        <h1 className="text-2xl font-bold text-white">{problem.title}</h1>
-                        <div className="flex items-center gap-4 mt-2">
-                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${getDifficultyColor(problem.difficulty)} bg-gray-800`}>
-                                {problem.difficulty}
-                            </span>
-                            <span className="text-sm text-gray-300">
-                                Points per test case: <span className="text-white font-medium">{problem.marksPerTestCase}</span>
-                            </span>
+                <div className="max-w-7xl mx-auto">
+                    {/* Title Row */}
+                    <div className="flex justify-between items-start mb-4">
+                        <div>
+                            <h1 className="text-2xl font-bold text-white">{problem.title}</h1>
+                            <div className="flex items-center gap-4 mt-2">
+                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getDifficultyColor(problem.difficulty)} bg-gray-800`}>
+                                    {problem.difficulty}
+                                </span>
+                                <span className="text-sm text-gray-300">
+                                    Points per test case: <span className="text-white font-medium">{problem.marksPerTestCase}</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <select
-                            value={language}
-                            onChange={(e) => {
-                                setLanguage(e.target.value);
-                                const templates = {
-                                    python: `# ${problem.title}\n\n# ${problem.statement}\n\n`,
-                                    cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    // ${problem.title}\n    // ${problem.statement}\n    \n    return 0;\n}`,
-                                    java: `public class Main {\n    public static void main(String[] args) {\n        // ${problem.title}\n        // ${problem.statement}\n    }\n}`,
-                                    javascript: `// ${problem.title}\n// ${problem.statement}\n\n`
-                                };
-                                setCode(templates[e.target.value] || templates.python);
-                            }}
-                            className="bg-gray-800 text-white px-4 py-2 rounded border border-gray-700"
-                        >
-                            <option value="python">Python</option>
-                            <option value="cpp">C++</option>
-                            <option value="java">Java</option>
-                            <option value="javascript">JavaScript</option>
-                        </select>
-                        <button
-                            onClick={submitCode}
-                            disabled={loading}
-                            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 disabled:cursor-not-allowed px-6 py-2 rounded text-white font-semibold transition"
-                        >
-                            {loading ? "Submitting..." : "Submit Code"}
-                        </button>
+
+                    {/* Controls Row */}
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <select
+                                value={language}
+                                onChange={(e) => {
+                                    setLanguage(e.target.value);
+                                    const templates = {
+                                        python: `# ${problem.title}\n\n# ${problem.statement}\n\n`,
+                                        cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    // ${problem.title}\n    // ${problem.statement}\n    \n    return 0;\n}`,
+                                        java: `public class Main {\n    public static void main(String[] args) {\n        // ${problem.title}\n        // ${problem.statement}\n    }\n}`,
+                                        javascript: `// ${problem.title}\n// ${problem.statement}\n\n`
+                                    };
+                                    setCode(templates[e.target.value] || templates.python);
+                                }}
+                                className="bg-gray-800 text-white px-4 py-2 rounded border border-gray-700"
+                            >
+                                <option value="python">Python</option>
+                                <option value="cpp">C++</option>
+                                <option value="java">Java</option>
+                                <option value="javascript">JavaScript</option>
+                            </select>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={submitCode}
+                                disabled={loading}
+                                className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 disabled:cursor-not-allowed px-6 py-2 rounded text-white font-semibold transition whitespace-nowrap"
+                            >
+                                {loading ? "Submitting..." : "Submit Code"}
+                            </button>
+                        </div>
                     </div>
                 </div>
                 {message && (
