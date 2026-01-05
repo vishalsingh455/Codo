@@ -94,7 +94,10 @@ const UserDashboard = () => {
                             <div>
                                 <p className="text-gray-400 text-sm">Competitions Joined</p>
                                 <p className="text-3xl font-bold text-white">
-                                    {myCompetitions.length}
+                                    {myCompetitions.filter(c => {
+                                        const now = new Date();
+                                        return new Date(c.startTime) <= now && new Date(c.endTime) >= now;
+                                    }).length}
                                 </p>
                             </div>
                         </div>
@@ -217,7 +220,15 @@ const UserDashboard = () => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {myCompetitions.map((competition) => {
+                            {myCompetitions
+                                .filter((competition) => {
+                                    // Only show active competitions (not ended/expired)
+                                    const now = new Date();
+                                    const start = new Date(competition.startTime);
+                                    const end = new Date(competition.endTime);
+                                    return now >= start && now <= end; // Active competitions only
+                                })
+                                .map((competition) => {
                                 const status = getCompetitionStatus(competition.startTime, competition.endTime);
                                 return (
                                     <div

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api';
+import CompetitionTimer from '../components/CompetitionTimer';
 
 const CompetitionDetails = () => {
     const { competitionId } = useParams();
@@ -148,6 +149,12 @@ const CompetitionDetails = () => {
                                     {status.text}
                                 </span>
                             </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-3">
+                            <CompetitionTimer
+                                startTime={competition.startTime}
+                                endTime={competition.endTime}
+                            />
                         </div>
                         <div className="flex gap-3">
                             {(status.text === 'Live' || status.text === 'Ended') && (
