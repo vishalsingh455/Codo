@@ -44,7 +44,10 @@ const runCodePiston = async (language, code, input) => {
 
     } catch (error) {
         console.error("Piston error:", error.message || error);
-        return ""; // treat as failed
+        return {
+            output: "",
+            error: error.message || "Piston execution failed"
+        };
     }
 };
 

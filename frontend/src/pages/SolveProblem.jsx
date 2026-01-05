@@ -15,7 +15,7 @@ const SolveProblem = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [submissions, setSubmissions] = useState([]);
-    const [activeTab, setActiveTab] = useState('editor');
+    const [activeTab, setActiveTab] = useState('editor');//mm
 
     const fetchProblemDetails = useCallback(async () => {
         try {

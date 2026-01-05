@@ -125,10 +125,41 @@ ${inputDeclarations}
 `;
 };
 
+
+// const generateCppWrapper = (userCode, functionName, parameters, testCaseInput) => {
+//     // Convert test case input to C++ variable declarations
+//     const inputDeclarations = Object.entries(testCaseInput)
+//         .map(([key, value]) => `    std::vector<int> ${key} = ${cppValue(value)};`)
+//         .join('\n');
+
+//     const paramList = parameters.map(p => p.name).join(', ');
+
+//     return `
+// #include <iostream>
+// #include <vector>
+// #include <string>
+
+// int main() {
+//     // Test execution
+// ${inputDeclarations}
+
+//     // Call function and print result directly (JSON format for int)
+//     auto result = ${functionName}(${paramList});
+//     std::cout << result << std::endl;
+
+//     return 0;
+// }
+
+// // User function
+// ${userCode}
+// `;
+// };
+
+// Helper functions for type conversion
 const generateCppWrapper = (userCode, functionName, parameters, testCaseInput) => {
-    // Convert test case input to C++ variable declarations
+    // Convert test case input to C++ variable declarations (vector<int> only)
     const inputDeclarations = Object.entries(testCaseInput)
-        .map(([key, value]) => `    auto ${key} = ${cppValue(value)};`)
+        .map(([key, value]) => `    std::vector<int> ${key} = ${cppValue(value)};`)
         .join('\n');
 
     const paramList = parameters.map(p => p.name).join(', ');
@@ -137,35 +168,31 @@ const generateCppWrapper = (userCode, functionName, parameters, testCaseInput) =
 #include <iostream>
 #include <vector>
 #include <string>
-#include <nlohmann/json.hpp>
+using namespace std;
 
 // User function
 ${userCode}
 
 int main() {
-    // Test execution
+    // Test input setup
 ${inputDeclarations}
 
-    // Call function
+    // Call function and print result directly (valid JSON for int)
     auto result = ${functionName}(${paramList});
-
-    // Print result as JSON
-    nlohmann::json j = result;
-    std::cout << j.dump() << std::endl;
+    cout << result << endl;
 
     return 0;
 }
 `;
 };
 
-// Helper functions for type conversion
 
 const pythonValue = (value) => {
     if (Array.isArray(value)) {
         return '[' + value.map(pythonValue).join(', ') + ']';
     }
     if (typeof value === 'string') {
-        return `'${value}'`;
+        return JSON.stringify(value);
     }
     return JSON.stringify(value);
 };
@@ -204,14 +231,44 @@ const javaValue = (value) => {
     return JSON.stringify(value);
 };
 
+// const cppValue = (value) => {
+//     if (Array.isArray(value)) {
+//         return `{${value.map(cppValue).join(', ')}}`;
+//     }
+//     if (typeof value === 'string') {
+//         return `std::string("${value}")`;
+//     }
+//     return JSON.stringify(value);
+// };
+
+const escapeCppString = (str) =>
+    str
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\t/g, '\\t');
+
 const cppValue = (value) => {
     if (Array.isArray(value)) {
         return `{${value.map(cppValue).join(', ')}}`;
     }
+
     if (typeof value === 'string') {
-        return `std::string("${value}")`;
+        return `std::string("${escapeCppString(value)}")`;
     }
-    return JSON.stringify(value);
+
+    if (typeof value === 'boolean') {
+        return value ? 'true' : 'false';
+    }
+
+    if (typeof value === 'number') {
+        return Number.isFinite(value) ? value.toString() : '0';
+    }
+
+    // fallback (should not happen in your platform)
+    return '0';
 };
+
 
 export default generateWrapperCode;

@@ -58,15 +58,20 @@ const executeSubmission = async (submission, testCases, problem) => {
 
             // Parse output as JSON and compare deeply
             try {
-                const parsedOutput = JSON.parse(result.output.trim());
+                const trimmedOutput = result.output.trim();
+                console.log("TRIMMED OUTPUT:", JSON.stringify(trimmedOutput));
+                const parsedOutput = JSON.parse(trimmedOutput);
+                console.log("PARSED OUTPUT:", parsedOutput);
                 if (deepEqual(parsedOutput, testCase.expectedOutput)) {
                     passed++;
+                } else {
+                    console.log("OUTPUT MISMATCH - Expected:", testCase.expectedOutput, "Got:", parsedOutput);
                 }
             } catch (parseError) {
                 // If output is not valid JSON, treat as error
-                console.error("JSON parse error:", parseError);
+                console.error("JSON parse error:", parseError, "Raw output:", JSON.stringify(result.output));
                 if (!firstError) {
-                    firstError = "Invalid output format - expected JSON";
+                    firstError = `Invalid output format - expected JSON. Error: ${parseError.message}`;
                 }
             }
         } catch (error) {
