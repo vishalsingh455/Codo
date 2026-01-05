@@ -216,7 +216,7 @@ const CompetitionDetails = () => {
                                             </div>
                                         </div>
                                         <p className="text-gray-400 text-sm mt-2 line-clamp-2">
-                                            {problem.statement.substring(0, 100)}...
+                                            {problem.description ? problem.description.substring(0, 100) + '...' : 'No description available'}
                                         </p>
                                         <div className="mt-3 text-sm text-gray-300">
                                             <span className="font-medium text-white">

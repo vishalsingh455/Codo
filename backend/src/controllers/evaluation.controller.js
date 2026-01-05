@@ -20,7 +20,8 @@ const evaluateSubmission = async (submissionId) => {
         // execute code
         const result = await executeSubmission(
             submission,
-            testCases
+            testCases,
+            problem
         );
 
         // calculate score

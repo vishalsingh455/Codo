@@ -4,32 +4,54 @@ import mongoose from "mongoose";
 
 const addProblem = async (req, res) => {
     try {
+        console.log('=== ADD PROBLEM CONTROLLER STARTED ===');
         const {competitionId} = req.params
+
+        console.log('=== DEBUG: Received request body ===');
+        console.log('Full body:', JSON.stringify(req.body, null, 2));
+        console.log('competitionId:', competitionId);
+        console.log('userId:', req.user?.id);
 
         const {
             title,
-            statement,
-            inputFormat,
-            outputFormat,
+            description,
+            functionName,
+            returnType,
+            parameters,
+            starterTemplates,
             constraints,
             difficulty
         } = req.body;
+
+        console.log('=== DEBUG: Destructured fields ===');
+        console.log('title:', title, 'truthy:', !!title);
+        console.log('description:', description, 'truthy:', !!description);
+        console.log('functionName:', functionName, 'truthy:', !!functionName);
+        console.log('returnType:', returnType, 'truthy:', !!returnType);
+        console.log('parameters:', parameters, 'truthy:', !!parameters);
+        console.log('starterTemplates:', starterTemplates, 'truthy:', !!starterTemplates);
+        console.log('difficulty:', difficulty, 'truthy:', !!difficulty);
 
         const userId = req.user.id
 
         // Validate required fields
         if (
             !title ||
-            !statement ||
-            !inputFormat ||
-            !outputFormat ||
+            !description ||
+            !functionName ||
+            !returnType ||
+            !parameters ||
+            !starterTemplates ||
             !difficulty
         ) {
+            console.log('=== DEBUG: Validation failed ===');
             return res.status(400).json({
                 success: false,
                 message: "All required fields must be provided"
             });
         }
+
+        console.log('=== DEBUG: Validation passed, proceeding ===');
 
         // find competition
         const competition = await Competition.findById(competitionId)
@@ -42,7 +64,7 @@ const addProblem = async (req, res) => {
             });
         }
 
-        // owenership check
+        // ownership check
         if(competition.organizer.toString() !== userId) {
             return res
             .status(403)
@@ -61,9 +83,11 @@ const addProblem = async (req, res) => {
         // Create Problem
         const problem = await Problem.create({
             title,
-            statement,
-            inputFormat,
-            outputFormat,
+            description,
+            functionName,
+            returnType,
+            parameters,
+            starterTemplates,
             constraints,
             difficulty,
             marksPerTestCase,

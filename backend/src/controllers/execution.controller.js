@@ -1,14 +1,46 @@
-import executeCode from "../execution/executor.js";
+import executeFunctionCode from "../execution/executor.js";
 
-const executeSubmission = async (submission, testCases) => {
+// Deep comparison utility for JSON objects
+const deepEqual = (a, b) => {
+    if (a === b) return true;
+
+    if (a == null || b == null) return a === b;
+
+    if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) {
+            if (!deepEqual(a[i], b[i])) return false;
+        }
+        return true;
+    }
+
+    if (typeof a === 'object' && typeof b === 'object') {
+        const keysA = Object.keys(a);
+        const keysB = Object.keys(b);
+
+        if (keysA.length !== keysB.length) return false;
+
+        for (const key of keysA) {
+            if (!keysB.includes(key)) return false;
+            if (!deepEqual(a[key], b[key])) return false;
+        }
+        return true;
+    }
+
+    return false;
+};
+
+const executeSubmission = async (submission, testCases, problem) => {
     let passed = 0;
     let firstError = "";
 
     for (let testCase of testCases) {
         try {
-            const result = await executeCode(
+            const result = await executeFunctionCode(
                 submission.language,
                 submission.code,
+                problem.functionName,
+                problem.parameters,
                 testCase.input
             );
 
@@ -24,10 +56,18 @@ const executeSubmission = async (submission, testCases) => {
                 continue; // Don't count as passed
             }
 
-            if (
-                result.output.trim() === testCase.expectedOutput.trim()
-            ) {
-                passed++;
+            // Parse output as JSON and compare deeply
+            try {
+                const parsedOutput = JSON.parse(result.output.trim());
+                if (deepEqual(parsedOutput, testCase.expectedOutput)) {
+                    passed++;
+                }
+            } catch (parseError) {
+                // If output is not valid JSON, treat as error
+                console.error("JSON parse error:", parseError);
+                if (!firstError) {
+                    firstError = "Invalid output format - expected JSON";
+                }
             }
         } catch (error) {
             console.error("Execution error:", error);

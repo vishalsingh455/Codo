@@ -22,38 +22,15 @@ const SolveProblem = () => {
             // Get problem details
             const problemRes = await api.get(`/problems/${problemId}`);
             setProblem(problemRes.data.problem);
-            
-            // Set default code template based on language
-            const templates = {
-                python: `# ${problemRes.data.problem.title}
 
-# ${problemRes.data.problem.statement}
+            // Set default code template based on language from starter templates
+            const starterCode = problemRes.data.problem.starterTemplates?.[language] || problemRes.data.problem.starterTemplates?.python || '';
+            setCode(starterCode);
 
-`,
-                cpp: `#include <iostream>
-using namespace std;
-
-int main() {
-    // ${problemRes.data.problem.title}
-    // ${problemRes.data.problem.statement}
-    
-    return 0;
-}`,
-                java: `import java.util.*;
-public class Main {
-    public static void main(String[] args) {
-        // ${problemRes.data.problem.title}
-        // ${problemRes.data.problem.statement}
-    }
-}`,
-                javascript: `// ${problemRes.data.problem.title}\n// ${problemRes.data.problem.statement}\n\n` 
-            };
-            setCode(templates[language] || templates.python);
-            
             // Get test cases for this problem (only visible ones)
             const testCasesRes = await api.get(`/problems/${problemId}/testcases`);
             setTestCases(testCasesRes.data.testCases || []);
-            
+
         } catch (error) {
             console.error("Error fetching problem details:", error);
         }
@@ -141,10 +118,10 @@ public class Main {
                                 onChange={(e) => {
                                     setLanguage(e.target.value);
                                     const templates = {
-                                        python: `# ${problem.title}\n\n# ${problem.statement}\n\n`,
-                                        cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    // ${problem.title}\n    // ${problem.statement}\n    \n    return 0;\n}`,
-                                        java: `public class Main {\n    public static void main(String[] args) {\n        // ${problem.title}\n        // ${problem.statement}\n    }\n}`,
-                                        javascript: `// ${problem.title}\n// ${problem.statement}\n\n`
+                                        python: `# ${problem.title}\n\n# ${problem.description || 'No description'}\n\n`,
+                                        cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    // ${problem.title}\n    // ${problem.description || 'No description'}\n    \n    return 0;\n}`,
+                                        java: `public class Main {\n    public static void main(String[] args) {\n        // ${problem.title}\n        // ${problem.description || 'No description'}\n    }\n}`,
+                                        javascript: `// ${problem.title}\n// ${problem.description || 'No description'}\n\n`
                                     };
                                     setCode(templates[e.target.value] || templates.python);
                                 }}
@@ -182,29 +159,33 @@ public class Main {
                 {/* Left Panel - Problem Details */}
                 <div className="w-1/2 border-r border-gray-800 overflow-y-auto">
                     <div className="p-6">
-                        {/* Problem Statement */}
+                        {/* Problem Description */}
                         <div className="mb-6">
-                            <h2 className="text-xl font-bold text-white mb-4">Problem Statement</h2>
-                            <p className="text-gray-300 leading-relaxed">{problem.statement}</p>
+                            <h2 className="text-xl font-bold text-white mb-4">Problem Description</h2>
+                            <p className="text-gray-300 leading-relaxed">{problem.description}</p>
                         </div>
 
-                        {/* Input/Output Format */}
-                        <div className="grid grid-cols-1 gap-4 mb-6">
+                        {/* Function Signature */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-bold text-white mb-4">Function Signature</h3>
                             <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-800">
-                                <h3 className="font-semibold text-white mb-2">Input Format</h3>
-                                <p className="text-gray-300 text-sm">{problem.inputFormat}</p>
+                                <code className="text-indigo-400 font-mono text-sm">
+                                    {problem.returnType} {problem.functionName}({problem.parameters?.map((param, idx) =>
+                                        `${param.type} ${param.name}${idx < (problem.parameters?.length || 0) - 1 ? ', ' : ''}`
+                                    ).join('') || ''})
+                                </code>
                             </div>
-                            <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-800">
-                                <h3 className="font-semibold text-white mb-2">Output Format</h3>
-                                <p className="text-gray-300 text-sm">{problem.outputFormat}</p>
-                            </div>
-                            {problem.constraints && (
+                        </div>
+
+                        {/* Constraints */}
+                        {problem.constraints && (
+                            <div className="mb-6">
+                                <h3 className="text-lg font-bold text-white mb-4">Constraints</h3>
                                 <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-800">
-                                    <h3 className="font-semibold text-white mb-2">Constraints</h3>
                                     <p className="text-gray-300 text-sm">{problem.constraints}</p>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
                         {/* Sample Test Cases */}
                         <div className="mb-6">
@@ -215,15 +196,15 @@ public class Main {
                                         <div key={index} className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                                             <div className="grid grid-cols-1 gap-4">
                                                 <div>
-                                                    <h4 className="font-medium text-gray-400 mb-2 text-sm">Input</h4>
-                                                    <pre className="bg-gray-900 p-3 rounded text-sm text-gray-300 whitespace-pre-wrap border border-gray-700 overflow-x-auto">
-                                                        {testCase.input}
+                                                    <h4 className="font-medium text-gray-400 mb-2 text-sm">Input Arguments</h4>
+                                                    <pre className="bg-gray-900 p-3 rounded text-sm text-indigo-300 font-mono whitespace-pre-wrap border border-gray-700 overflow-x-auto">
+                                                        {JSON.stringify(testCase.input, null, 2)}
                                                     </pre>
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-medium text-gray-400 mb-2 text-sm">Expected Output</h4>
-                                                    <pre className="bg-gray-900 p-3 rounded text-sm text-gray-300 whitespace-pre-wrap border border-gray-700 overflow-x-auto">
-                                                        {testCase.expectedOutput}
+                                                    <h4 className="font-medium text-gray-400 mb-2 text-sm">Expected Return Value</h4>
+                                                    <pre className="bg-gray-900 p-3 rounded text-sm text-green-300 font-mono whitespace-pre-wrap border border-gray-700 overflow-x-auto">
+                                                        {JSON.stringify(testCase.expectedOutput, null, 2)}
                                                     </pre>
                                                 </div>
                                             </div>
