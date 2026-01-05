@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
+import { generateStarterTemplates } from "../utils/codeTemplates";
 
 const AddProblem = () => {
     const { competitionId } = useParams();
@@ -38,6 +39,15 @@ const AddProblem = () => {
         }
     };
 
+    // Auto-generate starter templates when function signature changes
+    useEffect(() => {
+        if (functionName && returnType) {
+            const validParams = parameters.filter(p => p.name && p.type);
+            const templates = generateStarterTemplates(functionName, returnType, validParams);
+            setStarterTemplates(templates);
+        }
+    }, [functionName, returnType, parameters]);
+
     const updateStarterTemplate = (language, code) => {
         setStarterTemplates({
             ...starterTemplates,
@@ -65,22 +75,6 @@ const AddProblem = () => {
         }
         if (!returnType) {
             setError("Return type is required");
-            return;
-        }
-        if (!starterTemplates.python) {
-            setError("Python starter code is required");
-            return;
-        }
-        if (!starterTemplates.javascript) {
-            setError("JavaScript starter code is required");
-            return;
-        }
-        if (!starterTemplates.java) {
-            setError("Java starter code is required");
-            return;
-        }
-        if (!starterTemplates.cpp) {
-            setError("C++ starter code is required");
             return;
         }
 
@@ -220,17 +214,17 @@ const AddProblem = () => {
 
                 {/* Starter Code Templates */}
                 <div className="mb-6">
-                    <h3 className="text-white font-semibold mb-4">Starter Code Templates</h3>
+                    <h3 className="text-white font-semibold mb-2">Starter Code Templates</h3>
+                    <p className="text-gray-400 text-sm mb-4">Auto-generated based on function signature</p>
 
                     {/* Python */}
                     <div className="mb-4">
                         <label className="block text-gray-300 mb-2">Python:</label>
                         <textarea
                             value={starterTemplates.python}
-                            onChange={(e) => updateStarterTemplate('python', e.target.value)}
-                            placeholder="def function_name(params):&#10;    # Your code here&#10;    pass"
+                            readOnly
                             rows={6}
-                            className="w-full px-4 py-2 rounded bg-gray-800 text-white font-mono text-sm"
+                            className="w-full px-4 py-2 rounded bg-gray-700 text-gray-300 font-mono text-sm cursor-not-allowed"
                         />
                     </div>
 
@@ -239,10 +233,9 @@ const AddProblem = () => {
                         <label className="block text-gray-300 mb-2">JavaScript:</label>
                         <textarea
                             value={starterTemplates.javascript}
-                            onChange={(e) => updateStarterTemplate('javascript', e.target.value)}
-                            placeholder="function functionName(params) {&#10;    // Your code here&#10;}"
+                            readOnly
                             rows={6}
-                            className="w-full px-4 py-2 rounded bg-gray-800 text-white font-mono text-sm"
+                            className="w-full px-4 py-2 rounded bg-gray-700 text-gray-300 font-mono text-sm cursor-not-allowed"
                         />
                     </div>
 
@@ -251,10 +244,9 @@ const AddProblem = () => {
                         <label className="block text-gray-300 mb-2">Java:</label>
                         <textarea
                             value={starterTemplates.java}
-                            onChange={(e) => updateStarterTemplate('java', e.target.value)}
-                            placeholder="public static ReturnType functionName(Params) {&#10;    // Your code here&#10;}"
+                            readOnly
                             rows={6}
-                            className="w-full px-4 py-2 rounded bg-gray-800 text-white font-mono text-sm"
+                            className="w-full px-4 py-2 rounded bg-gray-700 text-gray-300 font-mono text-sm cursor-not-allowed"
                         />
                     </div>
 
@@ -263,10 +255,9 @@ const AddProblem = () => {
                         <label className="block text-gray-300 mb-2">C++:</label>
                         <textarea
                             value={starterTemplates.cpp}
-                            onChange={(e) => updateStarterTemplate('cpp', e.target.value)}
-                            placeholder="ReturnType functionName(Params) {&#10;    // Your code here&#10;}"
+                            readOnly
                             rows={6}
-                            className="w-full px-4 py-2 rounded bg-gray-800 text-white font-mono text-sm"
+                            className="w-full px-4 py-2 rounded bg-gray-700 text-gray-300 font-mono text-sm cursor-not-allowed"
                         />
                     </div>
                 </div>
