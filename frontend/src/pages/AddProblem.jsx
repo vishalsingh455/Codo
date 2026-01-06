@@ -124,6 +124,7 @@ const AddProblem = () => {
                 err.response?.data?.message ||
                 "Failed to add problem"
             );
+            console.log()
         }
     };
 
