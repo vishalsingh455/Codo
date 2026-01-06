@@ -100,7 +100,7 @@ const Leaderboard = () => {
                                             </td>
                                             <td className="py-4 text-right">
                                                 <span className="text-white font-bold text-lg">
-                                                    {entry.totalScore}
+                                                    {`${entry.totalScore}`}
                                                 </span>
                                             </td>
                                             <td className="py-4 text-gray-400 text-sm">

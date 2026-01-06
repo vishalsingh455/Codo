@@ -9,7 +9,7 @@ const addTestCase = async (req, res) => {
     
         const {input, expectedOutput, isHidden} = req.body
     
-        if (!input || !expectedOutput) {
+        if (input === undefined || input === null || expectedOutput === undefined || expectedOutput === null) {
             return res.status(400).json({
                 success: false,
                 message: "Input and expected output are required"

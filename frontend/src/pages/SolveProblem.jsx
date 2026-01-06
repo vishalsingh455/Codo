@@ -40,6 +40,30 @@ const SolveProblem = () => {
         fetchProblemDetails();
     }, [fetchProblemDetails]);
 
+    const runCode = async () => {
+        try {
+            setLoading(true);
+            setMessage("");
+
+            const response = await api.post(`/problems/${problemId}/run`, {
+                language,
+                code
+            });
+
+            const { passed, total, error } = response.data;
+            if (error) {
+                setMessage(`❌ Runtime Error: ${error}`);
+            } else {
+                setMessage(`✅ Run completed! Passed ${passed}/${total} test cases`);
+            }
+
+        } catch (error) {
+            setMessage(`❌ Run failed: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const submitCode = async () => {
         try {
             setLoading(true);
@@ -117,13 +141,9 @@ const SolveProblem = () => {
                                 value={language}
                                 onChange={(e) => {
                                     setLanguage(e.target.value);
-                                    const templates = {
-                                        python: `# ${problem.title}\n\n# ${problem.description || 'No description'}\n\n`,
-                                        cpp: `#include <iostream>\nusing namespace std;\n\nint main() {\n    // ${problem.title}\n    // ${problem.description || 'No description'}\n    \n    return 0;\n}`,
-                                        java: `public class Main {\n    public static void main(String[] args) {\n        // ${problem.title}\n        // ${problem.description || 'No description'}\n    }\n}`,
-                                        javascript: `// ${problem.title}\n// ${problem.description || 'No description'}\n\n`
-                                    };
-                                    setCode(templates[e.target.value] || templates.python);
+                                    // Use the proper starter template for the selected language
+                                    const starterCode = problem.starterTemplates?.[e.target.value] || problem.starterTemplates?.python || '';
+                                    setCode(starterCode);
                                 }}
                                 className="bg-gray-800 text-white px-4 py-2 rounded border border-gray-700"
                             >
@@ -135,6 +155,13 @@ const SolveProblem = () => {
                         </div>
 
                         <div className="flex items-center gap-3">
+                            <button
+                                onClick={runCode}
+                                disabled={loading}
+                                className="bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed px-6 py-2 rounded text-white font-semibold transition whitespace-nowrap"
+                            >
+                                {loading ? "Running..." : "Run Code"}
+                            </button>
                             <button
                                 onClick={submitCode}
                                 disabled={loading}
@@ -257,7 +284,7 @@ const SolveProblem = () => {
                         ) : (
                             <div className="h-full bg-gray-900/30">
                                 {/* Submission History */}
-                                <div className="h-full overflow-hidden">
+                                <div className="h-full overflow-y-auto">
                                     {submissions.length > 0 ? (
                                         <div className="h-full overflow-y-auto">
                                             {submissions
@@ -343,3 +370,216 @@ const SolveProblem = () => {
 };
 
 export default SolveProblem;
+
+// import { useState, useEffect, useCallback } from "react";
+// import { useParams } from "react-router-dom";
+// import CodeEditor from "../components/CodeEditor";
+// import CompetitionTimer from "../components/CompetitionTimer";
+// import api from "../services/api";
+
+// const SolveProblem = () => {
+//     const { problemId } = useParams();
+
+//     const [problem, setProblem] = useState(null);
+//     const [testCases, setTestCases] = useState([]);
+//     const [language, setLanguage] = useState("python");
+//     const [code, setCode] = useState("");
+//     const [loading, setLoading] = useState(false);
+//     const [message, setMessage] = useState("");
+//     const [submissions, setSubmissions] = useState([]);
+//     const [leftPanel, setLeftPanel] = useState("problem");
+
+//     /* 🔥 Resize State */
+//     const [leftWidth, setLeftWidth] = useState(40);
+//     const [isResizing, setIsResizing] = useState(false);
+
+//     const fetchProblemDetails = useCallback(async () => {
+//         try {
+//             const problemRes = await api.get(`/problems/${problemId}`);
+//             setProblem(problemRes.data.problem);
+
+//             const starterCode =
+//                 problemRes.data.problem.starterTemplates?.[language] ||
+//                 problemRes.data.problem.starterTemplates?.python ||
+//                 "";
+//             setCode(starterCode);
+
+//             const testCasesRes = await api.get(`/problems/${problemId}/testcases`);
+//             setTestCases(testCasesRes.data.testCases || []);
+//         } catch (error) {
+//             console.error("Error fetching problem details:", error);
+//         }
+//     }, [problemId, language]);
+
+//     useEffect(() => {
+//         fetchProblemDetails();
+//     }, [fetchProblemDetails]);
+
+//     /* 🔥 Mouse Resize Logic */
+//     useEffect(() => {
+//         const handleMouseMove = (e) => {
+//             if (!isResizing) return;
+//             const newWidth = (e.clientX / window.innerWidth) * 100;
+//             if (newWidth > 20 && newWidth < 70) {
+//                 setLeftWidth(newWidth);
+//             }
+//         };
+
+//         const handleMouseUp = () => setIsResizing(false);
+
+//         window.addEventListener("mousemove", handleMouseMove);
+//         window.addEventListener("mouseup", handleMouseUp);
+
+//         return () => {
+//             window.removeEventListener("mousemove", handleMouseMove);
+//             window.removeEventListener("mouseup", handleMouseUp);
+//         };
+//     }, [isResizing]);
+
+//     const runCode = async () => {
+//         try {
+//             setLoading(true);
+//             setMessage("");
+
+//             const response = await api.post(`/problems/${problemId}/run`, {
+//                 language,
+//                 code,
+//             });
+
+//             const { passed, total, error } = response.data;
+//             if (error) {
+//                 setMessage(`❌ Runtime Error: ${error}`);
+//             } else {
+//                 setMessage(`✅ Run completed! Passed ${passed}/${total} test cases`);
+//             }
+//         } catch (error) {
+//             setMessage(`❌ Run failed: ${error.response?.data?.message || error.message}`);
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     const submitCode = async () => {
+//         try {
+//             setLoading(true);
+//             setMessage("");
+
+//             await api.post(`/problems/${problemId}/submit`, { language, code });
+//             setMessage("✅ Code submitted successfully!");
+
+//             const submissionsRes = await api.get("/my-submissions");
+//             setSubmissions(submissionsRes.data.submissions || []);
+//         } catch (error) {
+//             setMessage(`❌ Submission failed: ${error.response?.data?.message || error.message}`);
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     const getDifficultyColor = (difficulty) => {
+//         if (difficulty === "easy") return "text-green-500";
+//         if (difficulty === "medium") return "text-yellow-500";
+//         if (difficulty === "hard") return "text-red-500";
+//         return "text-gray-400";
+//     };
+
+//     if (!problem) {
+//         return (
+//             <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+//                 <div className="animate-spin h-12 w-12 border-t-2 border-b-2 border-indigo-500 rounded-full" />
+//             </div>
+//         );
+//     }
+
+//     return (
+//         <div className="min-h-screen bg-gray-950">
+//             {/* Header */}
+//             <div className="bg-gray-900 border-b border-gray-800 px-6 py-4">
+//                 <div className="flex justify-between items-start">
+//                     <div>
+//                         <h1 className="text-2xl font-bold text-white">{problem.title}</h1>
+//                         <span className={`text-sm ${getDifficultyColor(problem.difficulty)}`}>
+//                             {problem.difficulty}
+//                         </span>
+//                     </div>
+//                     {problem.competition && (
+//                         <CompetitionTimer
+//                             startTime={problem.competition.startTime}
+//                             endTime={problem.competition.endTime}
+//                         />
+//                     )}
+//                 </div>
+//             </div>
+
+//             {/* MAIN LAYOUT */}
+//             <div className="flex h-[calc(100vh-80px)]">
+
+//                 {/* LEFT PANEL */}
+//                 <div
+//                     className="border-r border-gray-800 flex flex-col"
+//                     style={{ width: `${leftWidth}%` }}
+//                 >
+//                     <div className="flex border-b border-gray-800">
+//                         <button
+//                             onClick={() => setLeftPanel("problem")}
+//                             className={`flex-1 py-2 ${leftPanel === "problem"
+//                                     ? "bg-gray-800 text-white"
+//                                     : "text-gray-400"
+//                                 }`}
+//                         >
+//                             Description
+//                         </button>
+//                         <button
+//                             onClick={() => setLeftPanel("runs")}
+//                             className={`flex-1 py-2 ${leftPanel === "runs"
+//                                     ? "bg-gray-800 text-white"
+//                                     : "text-gray-400"
+//                                 }`}
+//                         >
+//                             Runs
+//                         </button>
+//                     </div>
+
+//                     <div className="flex-1 overflow-y-auto p-4 text-gray-300">
+//                         {leftPanel === "problem" ? (
+//                             <>
+//                                 <p>{problem.description}</p>
+//                                 <pre className="mt-4 bg-gray-900 p-3 rounded">
+//                                     {problem.returnType} {problem.functionName}()
+//                                 </pre>
+//                             </>
+//                         ) : (
+//                             <div>
+//                                 {submissions.map((s) => (
+//                                     <div key={s._id} className="mb-2 text-sm">
+//                                         {s.status} - {s.score}
+//                                     </div>
+//                                 ))}
+//                             </div>
+//                         )}
+//                     </div>
+//                 </div>
+
+//                 {/* 🔥 DRAG DIVIDER */}
+//                 <div
+//                     onMouseDown={() => setIsResizing(true)}
+//                     className="w-1 cursor-col-resize bg-gray-800 hover:bg-indigo-500"
+//                 />
+
+//                 {/* RIGHT PANEL */}
+//                 <div
+//                     className="flex flex-col"
+//                     style={{ width: `${100 - leftWidth}%` }}
+//                 >
+//                     <CodeEditor
+//                         language={language === "cpp" ? "cpp" : language}
+//                         code={code}
+//                         setCode={setCode}
+//                     />
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default SolveProblem;

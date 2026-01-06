@@ -132,7 +132,7 @@ const AddTestCase = () => {
                             value={expectedOutput}
                             onChange={(e) => setExpectedOutput(e.target.value)}
                             rows={6}
-                            placeholder={`[0, 1]`}
+                            placeholder={`true`}
                             className="w-full px-4 py-2 rounded bg-gray-800 text-white font-mono text-sm"
                         />
                         {outputError && (
