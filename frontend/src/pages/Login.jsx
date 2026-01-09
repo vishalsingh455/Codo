@@ -3,6 +3,7 @@ import api from "../services/api";
 import { useNavigate } from 'react-router-dom';
 import Register from "./Register";
 import { useAuth } from "../context/auth";
+import { ToastContainer, toast, Bounce } from "react-toastify";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -24,14 +25,25 @@ const Login = () => {
             await api.post("/auth/login", { email, password });
             await refreshUser();
             navigate('/dashboard', { replace: true });
+            toast.success(' Login Successful!', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                transition: Bounce,
+            });
         } catch (e) {
             setError(
                 e.response?.data?.message || "Something went wrong"
             );
         }
     };
-
-    return (
+    
+    return ( 
         <div className="min-h-screen flex items-center justify-center bg-gray-950">
             <form onSubmit={(e)=> {
                 handleLogin(e)

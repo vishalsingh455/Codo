@@ -1,4 +1,5 @@
 import React from 'react'
+import { ToastContainer, Bounce } from "react-toastify";
 import Login from './pages/Login'
 import Register from './pages/Register'
 import CodeEditor from './components/CodeEditor'
@@ -22,6 +23,19 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Bounce}
+        />
         <Navbar />
         <Routes>
           <Route

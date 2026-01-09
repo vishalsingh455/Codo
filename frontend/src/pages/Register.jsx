@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../context/auth";
+import { ToastContainer, toast, Bounce } from "react-toastify";
 
 const Register = () => {
     const [name, setName] = useState("")
@@ -24,6 +25,17 @@ const Register = () => {
             await api.post("/auth/login", { email, password });
             await refreshUser();
             navigate('/dashboard', { replace: true });
+            toast.success(' Registration Successful!', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+                transition: Bounce,
+            })
         } catch (error) {
             setError(
                 error.response?.data?.message || "Something went wrong"
