@@ -1,8 +1,10 @@
 // This is the main server file for the Codo coding competition platform
 // It sets up the Express server and connects all the different parts of the application
-
+import 'dotenv/config'; // This executes immediately at the very top
 import express from "express"; // Express is a web framework for Node.js
-import dotenv from 'dotenv' // Loads environment variables from .env file
+//import dotenv from 'dotenv' // Loads environment variables from .env file
+// Load environment variables (like database passwords, API keys)
+//dotenv.config()
 import cors from 'cors' // Allows requests from different websites (frontend to backend)
 import authRoutes from './routes/auth.routes.js' // Routes for login/register
 import testRoutes from './routes/test.routes.js' // Test routes (probably for development)
@@ -17,10 +19,7 @@ import submissionRoutes from './routes/submission.routes.js' // Routes for code 
 import leaderboardRoutes from './routes/leaderboard.routes.js' // Routes for competition rankings
 import resultRoutes from './routes/result.routes.js' // Routes for results
 import analyticsRoutes from './routes/analytics.routes.js' // Routes for analytics/statistics
-
-// Load environment variables (like database passwords, API keys)
-dotenv.config()
-
+import analyzeCodeRoutes from './routes/analyzeCode.routes.js' // Routes for code analysis
 // Create the main Express application
 const app = express()
 
@@ -72,6 +71,8 @@ app.use("/api", resultRoutes)
 
 // Analytics routes
 app.use("/api", analyticsRoutes)
+
+app.use('/api', analyzeCodeRoutes)
 
 // Export the app so it can be started in server.js
 export default app
