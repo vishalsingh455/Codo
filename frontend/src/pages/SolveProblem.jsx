@@ -391,6 +391,8 @@ const SolveProblem = () => {
     const [activeTab, setActiveTab] = useState('editor');//mm
     const [leftWidth, setLeftWidth] = useState(50); // %
     const [isResizing, setIsResizing] = useState(false);
+    const [analysisResult, setAnalysisResult] = useState(null);
+    const [analyzing, setAnalyzing] = useState(false);
 
 
     const fetchProblemDetails = useCallback(async () => {
@@ -486,6 +488,29 @@ const SolveProblem = () => {
         }
     };
 
+    const analyzeCode = async () => {
+        try {
+            setAnalyzing(true);
+            setAnalysisResult(null);
+
+            const response = await api.post('/ai/analyze-complexity', {
+                language,
+                code
+            });
+
+            if (response.data.success) {
+                setAnalysisResult(response.data.result);
+            } else {
+                setMessage(`❌ Analysis failed: ${response.data.message}`);
+            }
+
+        } catch (error) {
+            setMessage(`❌ Analysis failed: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setAnalyzing(false);
+        }
+    };
+
 
 
     const getDifficultyColor = (difficulty) => {
@@ -568,6 +593,13 @@ const SolveProblem = () => {
                             >
                                 {loading ? "Submitting..." : "Submit Code"}
                             </button>
+                            <button
+                                onClick={analyzeCode}
+                                disabled={analyzing}
+                                className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:cursor-not-allowed px-6 py-2 rounded text-white font-semibold transition whitespace-nowrap"
+                            >
+                                {analyzing ? "Analyzing..." : "Analyze Complexity"}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -578,6 +610,8 @@ const SolveProblem = () => {
                         </p>
                     </div>
                 )}
+
+
             </div>
 
             {/* Main Content */}
@@ -675,6 +709,15 @@ const SolveProblem = () => {
                         >
                             Submissions
                         </button>
+                        <button
+                            onClick={() => setActiveTab('analysis')}
+                            className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${activeTab === 'analysis'
+                                    ? 'text-white bg-gray-800 border-b-2 border-purple-500'
+                                    : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
+                                }`}
+                        >
+                            Analysis
+                        </button>
                     </div>
 
                     {/* Tab Content */}
@@ -687,12 +730,12 @@ const SolveProblem = () => {
                                     setCode={setCode}
                                 />
                             </div>
-                        ) : (
+                        ) : activeTab === 'submissions' ? (
                             <div className="h-full bg-gray-900/30">
                                 {/* Submission History */}
-                                    <div className="h-full overflow-y-auto">
+                                <div className="h-full overflow-y-auto">
                                     {submissions.length > 0 ? (
-                                            <div className="h-full overflow-y-auto  no-scrollbar">
+                                        <div className="h-full overflow-y-auto no-scrollbar">
                                             {submissions
                                                 .filter(sub => sub.problem._id === problemId)
                                                 .slice(0, 10)
@@ -744,7 +787,7 @@ const SolveProblem = () => {
                                                                         </div>
                                                                     </div>
                                                                     <div className="p-3">
-                                                                        <div className="bg-red-900/20 border border-red-800/30 rounded text-xs font-mono text-red-300 p-2 max-h-24 overflow-y-auto overflow-x-auto  no-scrollbar whitespace-pre-wrap break-words">
+                                                                        <div className="bg-red-900/20 border border-red-800/30 rounded text-xs font-mono text-red-300 p-2 max-h-24 overflow-y-auto overflow-x-auto no-scrollbar whitespace-pre-wrap break-words">
                                                                             {submission.error}
                                                                         </div>
                                                                     </div>
@@ -765,7 +808,43 @@ const SolveProblem = () => {
                                     )}
                                 </div>
                             </div>
-                        )}
+                        ) : activeTab === 'analysis' ? (
+                            <div className="h-full bg-gray-900/30 p-6">
+                                {analysisResult ? (
+                                    <div className="max-w-4xl mx-auto">
+                                        <h3 className="text-2xl font-bold text-white mb-6">Code Analysis</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                                                <div className="text-purple-300 text-sm font-medium mb-2">Time Complexity</div>
+                                                <div className="text-white text-2xl font-bold">{analysisResult.time_complexity}</div>
+                                            </div>
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                                                <div className="text-purple-300 text-sm font-medium mb-2">Space Complexity</div>
+                                                <div className="text-white text-2xl font-bold">{analysisResult.space_complexity}</div>
+                                            </div>
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 md:col-span-2">
+                                                <div className="text-purple-300 text-sm font-medium mb-3">Explanation</div>
+                                                <div className="text-gray-300 text-base leading-relaxed">{analysisResult.explanation}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center justify-center h-full">
+                                        <div className="text-center">
+                                            <div className="text-gray-500 text-lg mb-2">No analysis yet</div>
+                                            <div className="text-gray-600 text-sm mb-4">Click "Analyze Complexity" to get AI-powered code analysis</div>
+                                            <button
+                                                onClick={analyzeCode}
+                                                disabled={analyzing}
+                                                className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 disabled:cursor-not-allowed px-6 py-2 rounded text-white font-semibold transition"
+                                            >
+                                                {analyzing ? "Analyzing..." : "Analyze Complexity"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : null}
                     </div>
                 </div>
             </div>

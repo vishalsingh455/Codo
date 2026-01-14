@@ -64,8 +64,11 @@ const analyzeCode = async (req, res) => {
     try {
         const { code, language } = req.body;
 
-        // Use Gemini 2.5 Flash for speed and free tier access
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+        // Use Gemini 1.5 Flash for speed and free tier access
+        //const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" ,
+            systemInstruction: "You are a code analyzer. Always return valid JSON only."
+        });
 
         const prompt = `
             You are an expert computer science instructor.
@@ -91,7 +94,7 @@ const analyzeCode = async (req, res) => {
         console.error("Gemini Error:", error.message);
         return res.status(500).json({
             success: false,
-            message: "AI analysis failed."
+            message: `AI analysis failed: ${error.message}kkkk`
         });
     }
 };
