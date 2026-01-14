@@ -791,10 +791,10 @@ const SolveProblem = () => {
                                                 <div className="text-purple-300 text-sm font-medium mb-2">Space Complexity</div>
                                                 <div className="text-white text-2xl font-bold">{analysisResult.space_complexity}</div>
                                             </div>
-                                            {/* <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 md:col-span-2">
+                                            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 md:col-span-2">
                                                 <div className="text-purple-300 text-sm font-medium mb-3">Explanation</div>
                                                 <div className="text-gray-300 text-base leading-relaxed">{analysisResult.explanation}</div>
-                                            </div> */}
+                                            </div>
                                         </div>
                                     </div>
                                 ) : (
